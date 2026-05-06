@@ -1,0 +1,133 @@
+1:53:04 PM  [main] 	Initializing Control Panel
+1:53:04 PM  [main] 	Windows Version:  Enterprise  64-bit
+1:53:04 PM  [main] 	XAMPP Version: 8.2.12
+1:53:04 PM  [main] 	Control Panel Version: 3.3.0  [ Compiled: Apr 6th 2021 ]
+1:53:04 PM  [main] 	Running with Administrator rights - good!
+1:53:04 PM  [main] 	XAMPP Installation Directory: "c:\xampp\"
+1:53:04 PM  [main] 	Checking for prerequisites
+1:53:04 PM  [main] 	All prerequisites found
+1:53:04 PM  [main] 	Initializing Modules
+1:53:04 PM  [Apache] 	XAMPP Apache is already running on port 80
+1:53:04 PM  [Apache] 	XAMPP Apache is already running on port 443
+1:53:04 PM  [main] 	Starting Check-Timer
+1:53:04 PM  [main] 	Control Panel Ready
+1:53:06 PM  [mysql] 	Attempting to start MySQL app...
+1:53:07 PM  [mysql] 	Status change detected: running
+1:55:42 PM  [main] 	Executing "c:\xampp\"
+3:13:46 PM  [main] 	Deinitializing Modules
+3:13:46 PM  [main] 	Deinitializing Control Panel
+
+1:48:30 PM  [main] 	Initializing Control Panel
+1:48:30 PM  [main] 	Windows Version:  Enterprise  64-bit
+1:48:30 PM  [main] 	XAMPP Version: 8.2.12
+1:48:30 PM  [main] 	Control Panel Version: 3.3.0  [ Compiled: Apr 6th 2021 ]
+1:48:30 PM  [main] 	Running with Administrator rights - good!
+1:48:30 PM  [main] 	XAMPP Installation Directory: "c:\xampp\"
+1:48:30 PM  [main] 	Checking for prerequisites
+1:48:30 PM  [main] 	All prerequisites found
+1:48:30 PM  [main] 	Initializing Modules
+1:48:30 PM  [Apache] 	XAMPP Apache is already running on port 80
+1:48:30 PM  [Apache] 	XAMPP Apache is already running on port 443
+1:48:30 PM  [mysql] 	Problem detected!
+1:48:30 PM  [mysql] 	Port 3306 in use by "Unable to open process"!
+1:48:30 PM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+1:48:30 PM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+1:48:30 PM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+1:48:30 PM  [main] 	Starting Check-Timer
+1:48:30 PM  [main] 	Control Panel Ready
+1:48:38 PM  [mysql] 	Problem detected!
+1:48:38 PM  [mysql] 	Port 3306 in use by "Unable to open process"!
+1:48:38 PM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+1:48:38 PM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+1:48:38 PM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+1:48:38 PM  [mysql] 	Attempting to start MySQL app...
+1:48:38 PM  [mysql] 	Status change detected: running
+1:48:40 PM  [mysql] 	Status change detected: stopped
+1:48:40 PM  [mysql] 	Error: MySQL shutdown unexpectedly.
+1:48:40 PM  [mysql] 	This may be due to a blocked port, missing dependencies, 
+1:48:40 PM  [mysql] 	improper privileges, a crash, or a shutdown by another method.
+1:48:40 PM  [mysql] 	Press the Logs button to view error logs and check
+1:48:40 PM  [mysql] 	the Windows Event Viewer for more clues
+1:48:40 PM  [mysql] 	If you need more help, copy and post this
+1:48:40 PM  [mysql] 	entire log window on the forums
+1:48:42 PM  [mysql] 	Problem detected!
+1:48:42 PM  [mysql] 	Port 3306 in use by "Unable to open process"!
+1:48:42 PM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+1:48:42 PM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+1:48:42 PM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+1:48:42 PM  [mysql] 	Attempting to start MySQL app...
+1:48:42 PM  [mysql] 	Status change detected: running
+1:48:43 PM  [mysql] 	Status change detected: stopped
+1:48:43 PM  [mysql] 	Error: MySQL shutdown unexpectedly.
+1:48:43 PM  [mysql] 	This may be due to a blocked port, missing dependencies, 
+1:48:43 PM  [mysql] 	improper privileges, a crash, or a shutdown by another method.
+1:48:43 PM  [mysql] 	Press the Logs button to view error logs and check
+1:48:43 PM  [mysql] 	the Windows Event Viewer for more clues
+1:48:43 PM  [mysql] 	If you need more help, copy and post this
+1:48:43 PM  [mysql] 	entire log window on the forums
+1:53:07 PM  [mysql] 	Status change detected: running
+3:13:46 PM  [main] 	Deinitializing Modules
+3:13:46 PM  [main] 	Deinitializing Control Panel
+
+9:24:13 PM  [main] 	Initializing Control Panel
+9:24:13 PM  [main] 	Windows Version:  Enterprise  64-bit
+9:24:13 PM  [main] 	XAMPP Version: 8.2.12
+9:24:13 PM  [main] 	Control Panel Version: 3.3.0  [ Compiled: Apr 6th 2021 ]
+9:24:13 PM  [main] 	Running with Administrator rights - good!
+9:24:13 PM  [main] 	XAMPP Installation Directory: "c:\xampp\"
+9:24:13 PM  [main] 	Checking for prerequisites
+9:24:15 PM  [main] 	All prerequisites found
+9:24:15 PM  [main] 	Initializing Modules
+9:24:15 PM  [mysql] 	Problem detected!
+9:24:15 PM  [mysql] 	Port 3306 in use by "Unable to open process"!
+9:24:15 PM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+9:24:15 PM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+9:24:15 PM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+9:24:15 PM  [main] 	Starting Check-Timer
+9:24:15 PM  [main] 	Control Panel Ready
+9:24:17 PM  [Apache] 	Attempting to start Apache app...
+9:24:18 PM  [Apache] 	Status change detected: running
+9:24:24 PM  [mysql] 	Problem detected!
+9:24:24 PM  [mysql] 	Port 3306 in use by "Unable to open process"!
+9:24:24 PM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+9:24:24 PM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+9:24:24 PM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+9:24:24 PM  [mysql] 	Attempting to start MySQL app...
+9:24:26 PM  [mysql] 	Status change detected: running
+10:02:10 PM  [Tomcat] 	Status change detected: running
+10:25:23 PM  [Tomcat] 	Status change detected: stopped
+10:25:26 PM  [Tomcat] 	Status change detected: running
+10:34:11 PM  [Tomcat] 	Status change detected: stopped
+10:34:15 PM  [Tomcat] 	Status change detected: running
+12:01:07 AM  [Tomcat] 	Status change detected: stopped
+12:01:08 AM  [main] 	Deinitializing Modules
+12:01:08 AM  [main] 	Deinitializing Control Panel
+
+9:09:51 AM  [main] 	Initializing Control Panel
+9:09:51 AM  [main] 	Windows Version:  Enterprise  64-bit
+9:09:51 AM  [main] 	XAMPP Version: 8.2.12
+9:09:51 AM  [main] 	Control Panel Version: 3.3.0  [ Compiled: Apr 6th 2021 ]
+9:09:51 AM  [main] 	Running with Administrator rights - good!
+9:09:51 AM  [main] 	XAMPP Installation Directory: "c:\xampp\"
+9:09:51 AM  [main] 	Checking for prerequisites
+9:09:51 AM  [main] 	All prerequisites found
+9:09:51 AM  [main] 	Initializing Modules
+9:09:51 AM  [mysql] 	Problem detected!
+9:09:51 AM  [mysql] 	Port 3306 in use by "Unable to open process"!
+9:09:51 AM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+9:09:51 AM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+9:09:51 AM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+9:09:51 AM  [main] 	Starting Check-Timer
+9:09:51 AM  [main] 	Control Panel Ready
+9:09:54 AM  [Apache] 	Attempting to start Apache app...
+9:09:54 AM  [Apache] 	Status change detected: running
+9:09:59 AM  [mysql] 	Problem detected!
+9:09:59 AM  [mysql] 	Port 3306 in use by "Unable to open process"!
+9:09:59 AM  [mysql] 	MySQL WILL NOT start without the configured ports free!
+9:09:59 AM  [mysql] 	You need to uninstall/disable/reconfigure the blocking application
+9:09:59 AM  [mysql] 	or reconfigure MySQL and the Control Panel to listen on a different port
+9:09:59 AM  [mysql] 	Attempting to start MySQL app...
+9:10:01 AM  [mysql] 	Status change detected: running
+11:39:56 AM  [main] 	Deinitializing Modules
+11:39:56 AM  [main] 	Deinitializing Control Panel
+
