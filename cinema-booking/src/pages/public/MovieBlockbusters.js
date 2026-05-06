@@ -8,10 +8,9 @@ function MovieBlockbuster() {
   const { user } = useAuth();
 
   const [search, setSearch] = useState("");
-  const [nowShowing, setNowShowing] = useState([]);   // 🔥 từ API
-  const [comingSoon, setComingSoon] = useState([]);   // 🔥 từ API
+  const [nowShowing, setNowShowing] = useState([]);
+  const [comingSoon, setComingSoon] = useState([]);
 
-  /* ================= FETCH API ================= */
   useEffect(() => {
     fetchNowShowing();
     fetchComingSoon();
@@ -23,11 +22,8 @@ function MovieBlockbuster() {
         "http://localhost:8080/api/movies/blockbusters/now-showing"
       );
       const data = await res.json();
-
-      // 🔥 fix lỗi map
       setNowShowing(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Lỗi lấy phim đang chiếu:", err);
       setNowShowing([]);
     }
   };
@@ -38,15 +34,12 @@ function MovieBlockbuster() {
         "http://localhost:8080/api/movies/blockbusters/coming-soon"
       );
       const data = await res.json();
-
       setComingSoon(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("Lỗi lấy phim sắp chiếu:", err);
       setComingSoon([]);
     }
   };
 
-  /* ================= BOOKING ================= */
   const handleBooking = (movieId) => {
     if (!user) {
       alert("Vui lòng đăng nhập để đặt vé!");
@@ -62,11 +55,49 @@ function MovieBlockbuster() {
     navigate(`/booking/${movieId}`);
   };
 
-  /* ================= SEARCH ================= */
   const filterMovies = (list) =>
     list.filter((movie) =>
       movie.title?.toLowerCase().includes(search.toLowerCase())
     );
+
+  const MovieRow = ({ title, list }) => (
+    <>
+      <h2 style={styles.title}>{title}</h2>
+
+      <div style={styles.horizontalScroll}>
+        {filterMovies(list).map((movie) => (
+          <div key={movie.id} style={styles.card}>
+            <img src={movie.poster} alt={movie.title} style={styles.poster} />
+
+            <h4 style={styles.movieTitle}>{movie.title}</h4>
+            <p style={styles.genre}>{movie.genre}</p>
+
+            <div style={styles.buttonGroup}>
+              <button
+                style={styles.detailBtn}
+                onClick={() =>
+                  navigate(`/movies/${movie.id}`, { state: movie })
+                }
+              >
+                Chi tiết
+              </button>
+
+              {title.includes("đang chiếu") ? (
+                <button
+                  style={styles.bookingBtn}
+                  onClick={() => handleBooking(movie.id)}
+                >
+                  Đặt vé
+                </button>
+              ) : (
+                <button style={styles.comingBtn}>Sắp ra mắt</button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 
   return (
     <PublicLayout>
@@ -82,78 +113,8 @@ function MovieBlockbuster() {
           />
         </div>
 
-        {/* PHIM ĐANG CHIẾU */}
-        <h2 style={styles.title}>🎬 Phim đang chiếu</h2>
-
-        <div style={styles.grid}>
-          {filterMovies(nowShowing).map((movie) => (
-            <div key={movie.id} style={styles.card}>
-              <img
-                src={movie.poster}   // 🔥 đổi image -> poster
-                alt={movie.title}
-                style={styles.poster}
-              />
-              <h4 style={styles.movieTitle}>{movie.title}</h4>
-              <p style={styles.genre}>{movie.genre}</p>
-
-              <div style={styles.buttonGroup}>
-                <button
-                  style={styles.detailBtn}
-                  onClick={() =>
-                    navigate(`/movies/${movie.id}`, {
-                      state: movie,
-                    })
-                  }
-                >
-                  Chi tiết
-                </button>
-
-                <button
-                  style={styles.bookingBtn}
-                  onClick={() => handleBooking(movie.id)}
-                >
-                  Đặt vé
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* PHIM SẮP CHIẾU */}
-        <h2 style={{ ...styles.title, marginTop: "60px" }}>
-          🎥 Phim sắp chiếu
-        </h2>
-
-        <div style={styles.grid}>
-          {filterMovies(comingSoon).map((movie) => (
-            <div key={movie.id} style={styles.card}>
-              <img
-                src={movie.poster}
-                alt={movie.title}
-                style={styles.poster}
-              />
-              <h4 style={styles.movieTitle}>{movie.title}</h4>
-              <p style={styles.genre}>{movie.genre}</p>
-
-              <div style={styles.buttonGroup}>
-                <button
-                  style={styles.detailBtn}
-                  onClick={() =>
-                    navigate(`/movies/${movie.id}`, {
-                      state: movie,
-                    })
-                  }
-                >
-                  Chi tiết
-                </button>
-
-                <button style={styles.comingBtn}>
-                  Sắp ra mắt
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <MovieRow title="🎬 Phim đang chiếu" list={nowShowing} />
+        <MovieRow title="🎥 Phim sắp chiếu" list={comingSoon} />
       </div>
     </PublicLayout>
   );
@@ -180,48 +141,49 @@ const styles = {
     borderRadius: "25px",
     border: "none",
     outline: "none",
-    fontSize: "14px",
   },
 
   title: {
     borderLeft: "5px solid #e50914",
     paddingLeft: "15px",
-    marginBottom: "30px",
+    margin: "30px 0 20px",
     fontSize: "22px",
   },
 
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 260px))",
-    justifyContent: "start",
-    gap: "30px",
+  /* 🔥 SCROLL NGANG */
+  horizontalScroll: {
+    display: "flex",
+    gap: "20px",
+    overflowX: "auto",
+    paddingBottom: "15px",
+    scrollBehavior: "smooth",
   },
 
   card: {
+    minWidth: "220px",
     background: "#1c1c1c",
     padding: "15px",
     borderRadius: "15px",
     textAlign: "center",
-    transition: "0.3s",
+    flexShrink: 0,
     boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
-    overflow: "hidden",
   },
 
   poster: {
     width: "100%",
-    height: "350px",
+    height: "320px",
     objectFit: "cover",
     borderRadius: "12px",
-    marginBottom: "15px",
+    marginBottom: "10px",
   },
 
   movieTitle: {
-    margin: "10px 0 5px",
+    margin: "8px 0 5px",
   },
 
   genre: {
     color: "#bbb",
-    marginBottom: "15px",
+    marginBottom: "10px",
   },
 
   buttonGroup: {
@@ -231,7 +193,7 @@ const styles = {
   },
 
   detailBtn: {
-    padding: "8px 12px",
+    padding: "6px 10px",
     background: "#444",
     border: "none",
     borderRadius: "6px",
@@ -240,17 +202,16 @@ const styles = {
   },
 
   bookingBtn: {
-    padding: "8px 12px",
+    padding: "6px 10px",
     background: "#e50914",
     border: "none",
     borderRadius: "6px",
     color: "white",
     cursor: "pointer",
-    fontWeight: "bold",
   },
 
   comingBtn: {
-    padding: "8px 12px",
+    padding: "6px 10px",
     background: "#555",
     border: "none",
     borderRadius: "6px",

@@ -26,11 +26,6 @@ import ManageCustomers from "./pages/admin/ManageCustomers";
 import ManageCinema from "./pages/admin/ManageCinema";
 
 
-/* ===== STAFF ===== */
-import StaffLayout from "./layouts/StaffLayout";
-import StaffProfile from "./pages/staff/StaffProfile"
-import StaffScanTicket from "./pages/staff/StaffScanTicket";
-import StaffSchedule from "./pages/staff/StaffSchedule";
 
 function App() {
   return (
@@ -90,21 +85,7 @@ function App() {
             <Route path="cinema" element={<ManageCinema />} />
           </Route>
 
-          {/* ================= STAFF ================= */}
-          <Route
-            path="/staff"
-            element={
-              <ProtectedRoute roles={["staff"]}>
-                <StaffLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="profile" element={<StaffProfile />} />
-            <Route path="scan" element={<StaffScanTicket />} />
-            <Route path="schedule" element={<StaffSchedule />} />
-          </Route>
-            
-
+          
           {/* ================= 404 ================= */}
           <Route
             path="*"

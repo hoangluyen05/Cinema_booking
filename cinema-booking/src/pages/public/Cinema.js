@@ -18,13 +18,12 @@ function Cinema() {
     fetch("http://localhost:8080/api/cinemas")
       .then((res) => res.json())
       .then((data) => setCinemas(data))
-      .catch((err) => console.error(err));
+      .catch(() => setCinemas([]));
   }, []);
 
   /* ================= FETCH MOVIES ================= */
   useEffect(() => {
     if (!selectedCinema) {
-      // ALL
       fetch("http://localhost:8080/api/movies/now-showing")
         .then((res) => res.json())
         .then((data) => setNowShowing(Array.isArray(data) ? data : []));
@@ -33,30 +32,22 @@ function Cinema() {
         .then((res) => res.json())
         .then((data) => setComingSoon(Array.isArray(data) ? data : []));
     } else {
-      // theo rạp
-      fetch(
-        `http://localhost:8080/api/movies/cinema/${selectedCinema.id}`
-      )
+      fetch(`http://localhost:8080/api/movies/cinema/${selectedCinema.id}`)
         .then((res) => res.json())
         .then((data) => {
           const movies = Array.isArray(data) ? data : [];
 
-          setNowShowing(
-            movies.filter((m) => m.status === "now_showing")
-          );
-          setComingSoon(
-            movies.filter((m) => m.status === "coming_soon")
-          );
+          setNowShowing(movies.filter((m) => m.status === "now_showing"));
+          setComingSoon(movies.filter((m) => m.status === "coming_soon"));
         });
     }
   }, [selectedCinema]);
 
-  /* ================= FILTER ================= */
+  /* ================= FILTER CINEMA ================= */
   const filteredCinemas = cinemas.filter((c) =>
     c?.cinemaName?.toLowerCase().includes(search.toLowerCase())
   );
 
-  /* ================= SELECT CINEMA ================= */
   const handleSelectCinema = (cinema) => {
     setSelectedCinema(cinema);
     setSearch(cinema.cinemaName);
@@ -68,18 +59,44 @@ function Cinema() {
     setSearch("");
   };
 
+  /* ================= MOVIE ROW ================= */
+  const MovieRow = ({ title, list }) => (
+    <>
+      <h3 style={styles.title}>{title}</h3>
+
+      <div style={styles.horizontalScroll}>
+        {list.map((movie) => (
+          <div
+            key={movie.id}
+            style={styles.movieCard}
+            onClick={() =>
+              navigate(`/movies/${movie.id}`, { state: movie })
+            }
+          >
+            <img
+              src={movie.poster}
+              alt={movie.title}
+              style={styles.movieImg}
+            />
+            <div style={styles.movieTitle}>{movie.title}</div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+
   /* ================= UI ================= */
   return (
     <PublicLayout>
       <div style={styles.app}>
         <div style={styles.content}>
-          <h3>Rạp phim</h3>
+          <h2>🎬 Rạp phim</h2>
 
-          {/* SEARCH + SELECT COMBO */}
+          {/* SEARCH CINEMA */}
           <div style={styles.searchBox}>
             <input
               type="text"
-              placeholder="🔍 Chọn hoặc nhập tên rạp..."
+              placeholder="🔍 Chọn rạp..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -117,61 +134,16 @@ function Cinema() {
             )}
           </div>
 
-          {/* ===== NOW SHOWING ===== */}
-          <h3 style={{ marginTop: "30px" }}>
-            🎬 Phim đang chiếu
-          </h3>
+          {/* MOVIES */}
+          <MovieRow
+            title="🎬 Phim đang chiếu"
+            list={nowShowing}
+          />
 
-          <div style={styles.movieGrid}>
-            {nowShowing.map((movie) => (
-              <div
-                key={movie.id}
-                style={styles.movieCard}
-                onClick={() =>
-                  navigate(`/movies/${movie.id}`, {
-                    state: movie,
-                  })
-                }
-              >
-                <img
-                  src={movie.poster}
-                  alt={movie.title}
-                  style={styles.movieImg}
-                />
-                <div style={styles.movieTitle}>
-                  {movie.title}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ===== COMING SOON ===== */}
-          <h3 style={{ marginTop: "30px" }}>
-            🎥 Phim sắp chiếu
-          </h3>
-
-          <div style={styles.movieGrid}>
-            {comingSoon.map((movie) => (
-              <div
-                key={movie.id}
-                style={styles.movieCard}
-                onClick={() =>
-                  navigate(`/movies/${movie.id}`, {
-                    state: movie,
-                  })
-                }
-              >
-                <img
-                  src={movie.poster}
-                  alt={movie.title}
-                  style={styles.movieImg}
-                />
-                <div style={styles.movieTitle}>
-                  {movie.title}
-                </div>
-              </div>
-            ))}
-          </div>
+          <MovieRow
+            title="🎥 Phim sắp chiếu"
+            list={comingSoon}
+          />
         </div>
       </div>
     </PublicLayout>
@@ -182,23 +154,63 @@ function Cinema() {
 
 const styles = {
   app: {
-    backgroundColor: "#000",
+    background: "#000",
     color: "white",
     minHeight: "100vh",
   },
+
   content: {
     padding: "40px 60px",
   },
+
+  title: {
+    borderLeft: "5px solid #e50914",
+    paddingLeft: "15px",
+    margin: "30px 0 20px",
+  },
+
+  /* 🔥 SCROLL NGANG */
+  horizontalScroll: {
+    display: "flex",
+    gap: "20px",
+    overflowX: "auto",
+    paddingBottom: "15px",
+    scrollBehavior: "smooth",
+  },
+
+  movieCard: {
+    minWidth: "180px",
+    background: "#222",
+    borderRadius: "10px",
+    overflow: "hidden",
+    cursor: "pointer",
+    flexShrink: 0,
+    transition: "0.3s",
+  },
+
+  movieImg: {
+    width: "100%",
+    height: "260px",
+    objectFit: "cover",
+  },
+
+  movieTitle: {
+    padding: "10px",
+  },
+
+  /* SEARCH */
   searchBox: {
     position: "relative",
     width: "350px",
   },
+
   searchInput: {
     width: "100%",
     padding: "10px",
     borderRadius: "20px",
     border: "none",
   },
+
   clearBtn: {
     position: "absolute",
     right: "10px",
@@ -208,6 +220,7 @@ const styles = {
     color: "white",
     cursor: "pointer",
   },
+
   dropdown: {
     position: "absolute",
     top: "45px",
@@ -218,30 +231,11 @@ const styles = {
     overflowY: "auto",
     zIndex: 10,
   },
+
   dropdownItem: {
     padding: "10px",
     cursor: "pointer",
     borderBottom: "1px solid #333",
-  },
-  movieGrid: {
-    display: "flex",
-    gap: "20px",
-    flexWrap: "wrap",
-  },
-  movieCard: {
-    backgroundColor: "#222",
-    borderRadius: "8px",
-    overflow: "hidden",
-    width: "180px",
-    cursor: "pointer",
-  },
-  movieImg: {
-    width: "100%",
-    height: "250px",
-    objectFit: "cover",
-  },
-  movieTitle: {
-    padding: "10px",
   },
 };
 
