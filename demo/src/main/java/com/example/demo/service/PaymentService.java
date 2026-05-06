@@ -1,9 +1,11 @@
-package com.example.demo.service;
+package backend.service;
 
-import com.example.demo.entity.Booking;
-import com.example.demo.entity.Ticket;
-import com.example.demo.repository.BookingRepository;
-import com.example.demo.repository.TicketRepository;
+import backend.entity.Order;
+import backend.entity.Payment;
+import backend.enums.PaymentMethod;
+import backend.enums.StatusPayment;
+import backend.repository.OrderRepository;
+import backend.repository.PaymentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -12,111 +14,118 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
 public class PaymentService {
 
     @Autowired
-    private BookingRepository bookingRepo;
+    private OrderRepository orderRepo;
 
     @Autowired
-    private TicketRepository ticketRepo;
+    private PaymentRepository paymentRepo;
 
-    // PAYOS KEY
+    
     private final String CLIENT_ID = "c4590c7a-47c7-4e7e-b1b6-525cb9ce71d8";
     private final String API_KEY = "8c4dbf36-6d23-47ef-ad77-35be40b4a355";
     private final String CHECKSUM_KEY = "1d68bd16504b236b9eb05182efba1eefdec1de9d701394ac613eee782a28e177";
 
-    private final String PAYOS_URL =
-            "https://api-merchant.payos.vn/v2/payment-requests";
+    private final String PAYOS_URL = "https://api-merchant.payos.vn/v2/payment-requests";
 
-    // =====================================================
-    // CREATE PAYMENT
-    // =====================================================
-    public Map<String, Object> createPayment(Long bookingId) {
+    
+    
+    
+    public Map<String, Object> createPayOSPayment(Long orderId) {
 
-        Booking booking = bookingRepo.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        Payment payment = paymentRepo.findByOrder_Id(orderId)
+                .orElseGet(() -> paymentRepo.save(
+                        Payment.builder()
+                                .order(order)
+                                .paymentMethod(PaymentMethod.PAYOS)
+                                .status(StatusPayment.PENDING)
+                                .build()
+                ));
 
         try {
-
             RestTemplate restTemplate = new RestTemplate();
 
-            int price = booking.getTotal_price().intValue();
+            int price = order.getPrice().intValueExact();
 
-            long orderCode =
-                    bookingId;
+            
+            long orderCode = orderId;
 
-           String frontendUrl = "http://localhost:3000"; 
+            
+             String frontendUrl = "http://localhost:3000"; 
 
-// 2. Tạo returnUrl trỏ thẳng về trang chi tiết sách kèm theo ID
-String returnUrl = frontendUrl + "/account";
-String cancelUrl = frontendUrl + "/account" ;
+            Long bookId = order.getBook().getId();
 
+            String returnUrl = frontendUrl + "/book-detail/" + bookId;
+            String cancelUrl = frontendUrl + "/book-detail/" + bookId;
 
             Map<String, Object> body = new HashMap<>();
             body.put("orderCode", orderCode);
             body.put("amount", price);
-            body.put("description", "BOOKING_" + bookingId);
+            body.put("description", "ORDER_" + orderId);
             body.put("returnUrl", returnUrl);
             body.put("cancelUrl", cancelUrl);
 
-            body.put("buyerName", "User");
-            body.put("buyerEmail", "user@gmail.com");
-            body.put("buyerPhone", "0900000000");
+            body.put("buyerName", "Hoang");
+            body.put("buyerEmail", "hoang@gmail.com");
+            body.put("buyerPhone", "0900000001");
 
-            body.put("expiredAt",
-                    (System.currentTimeMillis() / 1000L) + 3600);
+            body.put("expiredAt", (System.currentTimeMillis() / 1000L) + 3600);
 
+            
             String signature = generateSignature(
                     price,
                     cancelUrl,
-                    "BOOKING_" + bookingId,
+                    "ORDER_" + orderId,
                     orderCode,
                     returnUrl
             );
 
             body.put("signature", signature);
 
+            
             Map<String, Object> item = new HashMap<>();
-            item.put("name", "Movie Tickets");
+            item.put("name", "Book");
             item.put("quantity", 1);
             item.put("price", price);
 
             body.put("items", List.of(item));
+
+            
+            System.out.println("SIGNATURE: " + signature);
+            System.out.println("FINAL BODY: " + body);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("x-client-id", CLIENT_ID);
             headers.set("x-api-key", API_KEY);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<Map<String, Object>> request =
-                    new HttpEntity<>(body, headers);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-            ResponseEntity<Map> response =
-                    restTemplate.postForEntity(
-                            PAYOS_URL,
-                            request,
-                            Map.class
-                    );
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                    PAYOS_URL,
+                    request,
+                    Map.class
+            );
 
             Map<String, Object> res = response.getBody();
-            System.out.println("PAYOS RESPONSE: " + res); // 👈 thêm dòng này
 
-if (res == null || res.get("data") == null) {
-    return Map.of(
-        "error", "PayOS error",
-        "response", res
-    );
-}
-            Map<String, Object> data =
-                    (Map<String, Object>) res.get("data");
+            System.out.println("PAYOS RESPONSE: " + res);
 
-            return Map.of(
-                    "checkoutUrl",
-                    data.get("checkoutUrl")
-            );
+            if (res == null || !"00".equals(String.valueOf(res.get("code")))) {
+                return Map.of("error", res);
+            }
+
+            Map<String, Object> data = (Map<String, Object>) res.get("data");
+
+            return Map.of("checkoutUrl", data.get("checkoutUrl"));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,89 +133,9 @@ if (res == null || res.get("data") == null) {
         }
     }
 
-    // =====================================================
-    // WEBHOOK
-    // =====================================================
-    public String webhook(Map<String, Object> body) {
-
-    try {
-
-        System.out.println("WEBHOOK CALLED: " + body);
-
-        if (body == null) return "BODY NULL";
-
-        Object dataObj = body.get("data");
-
-        if (!(dataObj instanceof Map)) {
-            System.out.println("INVALID DATA");
-            return "INVALID";
-        }
-
-        Map<String, Object> data = (Map<String, Object>) dataObj;
-
-        System.out.println("DATA: " + data);
-
-        Long orderCode =
-                Long.valueOf(data.get("orderCode").toString());
-
-        Long bookingId = orderCode;
-
-        System.out.println("BOOKING ID: " + bookingId);
-
-        Object codeObj = data.get("code");
-
-        if (codeObj == null) {
-            System.out.println("NO CODE FIELD");
-            return "INVALID";
-        }
-
-        String code = codeObj.toString();
-
-        System.out.println("PAYMENT CODE: " + code);
-
-        Optional<Booking> optional =
-                bookingRepo.findById(bookingId);
-
-        if (optional.isEmpty()) {
-            System.out.println("BOOKING NOT FOUND");
-            return "NOT FOUND";
-        }
-
-        Booking booking = optional.get();
-
-        if ("00".equals(code)) {
-
-            System.out.println("PAYMENT SUCCESS");
-
-            booking.setStatus("paid");
-
-            List<Ticket> tickets =
-                    ticketRepo.findByBookingId(bookingId);
-
-            for (Ticket t : tickets) {
-                t.setStatus("booked");
-            }
-
-            ticketRepo.saveAll(tickets);
-
-        } else {
-            System.out.println("PAYMENT FAILED");
-            booking.setStatus("cancelled");
-        }
-
-        bookingRepo.save(booking);
-
-        return "OK";
-
-    } catch (Exception e) {
-        e.printStackTrace(); // 👈 QUAN TRỌNG
-        return "ERROR";
-    }
-}
-
-    // =====================================================
-    // SIGNATURE
-    // =====================================================
+    
+    
+    
     private String generateSignature(
             int amount,
             String cancelUrl,
@@ -222,38 +151,90 @@ if (res == null || res.get("data") == null) {
                 "&orderCode=" + orderCode +
                 "&returnUrl=" + returnUrl;
 
+        System.out.println("RAW SIGN DATA: " + rawData);
+
         return hmacSHA256(rawData, CHECKSUM_KEY);
     }
 
-    private String hmacSHA256(String data, String key)
-            throws Exception {
+    
+    
+    
+    private String hmacSHA256(String data, String key) throws Exception {
+    Mac mac = Mac.getInstance("HmacSHA256");
 
-        Mac mac = Mac.getInstance("HmacSHA256");
+    SecretKeySpec secretKey = new SecretKeySpec(
+            key.getBytes(StandardCharsets.UTF_8),
+            "HmacSHA256"
+    );
 
-        SecretKeySpec secretKey =
-                new SecretKeySpec(
-                        key.getBytes(),
-                        "HmacSHA256"
-                );
+    mac.init(secretKey);
 
-        mac.init(secretKey);
+    byte[] rawHmac = mac.doFinal(
+            data.getBytes(StandardCharsets.UTF_8)
+    );
 
-        byte[] raw =
-                mac.doFinal(data.getBytes());
-
-        StringBuilder hex = new StringBuilder();
-
-        for (byte b : raw) {
-            String s = Integer.toHexString(0xff & b);
-            if (s.length() == 1) hex.append('0');
-            hex.append(s);
-        }
-
-        return hex.toString();
+    
+    StringBuilder hex = new StringBuilder(2 * rawHmac.length);
+    for (byte b : rawHmac) {
+        String s = Integer.toHexString(0xff & b);
+        if (s.length() == 1) hex.append('0');
+        hex.append(s);
     }
+
+    return hex.toString(); 
 }
 
+    
+    
+    
+    public String handlePayOSWebhook(Map<String, Object> body) {
 
-// cd C:\Users\laptop\Downloads
-//.\ngrok.exe http 8080
-// .\gradlew bootRun
+        try {
+            Map<String, Object> data = (Map<String, Object>) body.get("data");
+
+            Long orderCode = Long.valueOf(data.get("orderCode").toString());
+            String code = data.get("code").toString();
+
+            
+            Long orderId = orderCode;
+
+            Payment payment = paymentRepo.findByOrder_Id(orderId)
+                    .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+            Order order = payment.getOrder();
+
+            if ("00".equals(code)) {
+    payment.setStatus(StatusPayment.SUCCESS);
+    order.setStatus(backend.enums.StatusOrder.PAID);
+} else {
+    payment.setStatus(StatusPayment.FAILED);
+}
+
+            paymentRepo.save(payment);
+            orderRepo.save(order);
+
+            System.out.println("WEBHOOK SUCCESS");
+
+            return "OK";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERROR";
+        }
+    }
+
+    
+    
+    
+    public Map<String, Object> getPaymentStatus(Long orderId) {
+
+        Payment payment = paymentRepo.findByOrder_Id(orderId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        return Map.of(
+                "orderId", orderId,
+                "paymentStatus", payment.getStatus().name(),
+                "orderStatus", payment.getOrder().getStatus().name()
+        );
+    }
+}
