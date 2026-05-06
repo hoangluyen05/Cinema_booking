@@ -37,7 +37,15 @@ function PublicLayout({ children }) {
           >
             Phim
           </Link>
-
+          <Link
+            to="/blockbusters"
+            style={{
+              ...styles.link,
+              ...(isActive("/blockbusters") && styles.activeLink),
+            }}
+          >
+            Phim bom tấn
+          </Link>
           <Link
             to="/cinema"
             style={{

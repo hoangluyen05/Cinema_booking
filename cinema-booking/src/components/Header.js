@@ -11,6 +11,7 @@ const Header = () => {
       <div className="nav">
         <Link to="/">Trang chủ</Link>
         <Link to="/movies">Phim</Link>
+        <Link to="/blockbusters">Phim bom tấn</Link>
         {/* Phân quyền */}
         {user?.role === "user" && <Link to="/account">Tài khoản</Link>}
         {user?.role === "admin" && <Link to="/admin/movies">Quản trị</Link>}

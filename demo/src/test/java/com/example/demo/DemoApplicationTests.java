@@ -1,13 +1,13 @@
 package com.example.demo;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling; // Thêm dòng này
 
-@SpringBootTest
-class DemoApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
+@SpringBootApplication
+@EnableScheduling // Kích hoạt chạy tự động theo lịch trình
+public class DemoApplicationTests {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplicationTests.class, args);
+    }
 }

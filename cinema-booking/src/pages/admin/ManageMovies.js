@@ -4,7 +4,6 @@ const API = "http://localhost:8080/api/movies";
 
 const ManageMovies = () => {
   const [tab, setTab] = useState("list");
-
   const [movies, setMovies] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
@@ -12,18 +11,16 @@ const ManageMovies = () => {
   const [form, setForm] = useState({
     title: "",
     genre: "",
-    duration: "",
+    duration: 0,
     description: "",
     releaseDate: "",
     poster: "",
     status: "",
+    blockbuster: false,
+    budget: 0,
   });
 
-  const [filters, setFilters] = useState({
-    title: "",
-    genre: "",
-    status: "",
-  });
+  const [filters, setFilters] = useState({ title: "", genre: "", status: "" });
 
   useEffect(() => {
     fetchMovies();
@@ -41,40 +38,60 @@ const ManageMovies = () => {
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target;
+    let finalValue = value;
 
-  const resetForm = () => {
-    setForm({
-      title: "",
-      genre: "",
-      duration: "",
-      description: "",
-      releaseDate: "",
-      poster: "",
-      status: "",
-    });
-    setEditingId(null);
+    if (name === "blockbuster") {
+      finalValue = value === "true";
+    } else if (name === "budget" || name === "duration") {
+      finalValue = value === "" ? 0 : Number(value);
+    }
+
+    setForm((prev) => ({ ...prev, [name]: finalValue }));
   };
 
   const handleSubmit = async () => {
     const method = editingId ? "PUT" : "POST";
     const url = editingId ? `${API}/${editingId}` : API;
 
-    await fetch(url, {
+    const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
 
-    resetForm();
-    setTab("list");
-    fetchMovies();
+    if (res.ok) {
+      alert(editingId ? "Cập nhật thành công!" : "Thêm mới thành công!");
+      resetForm();
+      setTab("list");
+      fetchMovies();
+    } else {
+      alert("Lỗi khi lưu dữ liệu!");
+    }
+  };
+
+  const resetForm = () => {
+    setForm({
+      title: "",
+      genre: "",
+      duration: 0,
+      description: "",
+      releaseDate: "",
+      poster: "",
+      status: "",
+      budget: 0,
+      blockbuster: false,
+    });
+    setEditingId(null);
   };
 
   const handleEdit = (m) => {
     setEditingId(m.id);
-    setForm(m);
+    setForm({
+      ...m,
+      budget: m.budget || 0,
+      blockbuster: m.blockbuster || false,
+    });
     setTab("form");
   };
 
@@ -101,155 +118,186 @@ const ManageMovies = () => {
             }}
             style={tabBtn(tab === "form")}
           >
-            Thêm phim
+            Thêm phim mới
           </button>
         </div>
 
-        {/* ===== LIST ===== */}
+        {/* ================= LIST ================= */}
         {tab === "list" && (
           <table style={tableStyle}>
             <thead>
-              <tr style={{ color: "red" }}>
+              <tr>
                 <th style={thStyle}>
                   Tên
                   <input
                     name="title"
-                    placeholder="Tìm..."
                     onChange={handleFilterChange}
                     style={filterInputStyle}
                   />
                 </th>
-
                 <th style={thStyle}>
                   Thể loại
                   <input
                     name="genre"
-                    placeholder="Tìm..."
                     onChange={handleFilterChange}
                     style={filterInputStyle}
                   />
                 </th>
-
-                <th style={thStyle}>Thời lượng</th>
-
                 <th style={thStyle}>
                   Trạng thái
                   <input
                     name="status"
-                    placeholder="Tìm..."
                     onChange={handleFilterChange}
                     style={filterInputStyle}
                   />
                 </th>
-
+                <th style={thStyle}>Bom tấn</th>
                 <th style={thStyle}>Thao tác</th>
               </tr>
             </thead>
 
             <tbody>
-              {movies.length > 0 ? (
-                movies.map((m) => (
-                  <tr
-                    key={m.id}
-                    style={{ textAlign: "center", cursor: "pointer" }}
-                    onClick={() => setSelectedMovie(m)}
-                  >
-                    <td style={tdStyle}>{m.title}</td>
-                    <td style={tdStyle}>{m.genre}</td>
-                    <td style={tdStyle}>{m.duration}</td>
-                    <td style={tdStyle}>{m.status}</td>
-                    <td style={tdStyle}>
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(m);
-                        }}
-                        style={iconStyle}
-                      >
-                        ✏
-                      </span>
-
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(m.id);
-                        }}
-                        style={iconStyle}
-                      >
-                        🗑
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" style={{ padding: "20px", opacity: 0.6 }}>
-                    Không tìm thấy dữ liệu
+              {movies.map((m) => (
+                <tr
+                  key={m.id}
+                  style={{ textAlign: "center", cursor: "pointer" }}
+                  onClick={() => setSelectedMovie(m)}   // 👉 mở popup
+                >
+                  <td style={tdStyle}>{m.title}</td>
+                  <td style={tdStyle}>{m.genre}</td>
+                  <td style={tdStyle}>{m.status}</td>
+                  <td style={tdStyle}>{m.blockbuster ? "✅" : "❌"}</td>
+                  <td style={tdStyle}>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(m);
+                      }}
+                      style={iconStyle}
+                    >
+                      ✏
+                    </span>
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(m.id);
+                      }}
+                      style={iconStyle}
+                    >
+                      🗑
+                    </span>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         )}
 
-        {/* ===== FORM ===== */}
+        {/* ================= FORM ================= */}
         {tab === "form" && (
-          <>
-            <input name="title" placeholder="Tên phim" value={form.title} onChange={handleChange} style={inputStyle} />
-            <input name="genre" placeholder="Thể loại" value={form.genre} onChange={handleChange} style={inputStyle} />
-            <input name="duration" placeholder="Thời lượng" value={form.duration} onChange={handleChange} style={inputStyle} />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <label>Tên phim:</label>
+            <input name="title" value={form.title} onChange={handleChange} style={inputStyle} />
 
+            <label>Thể loại:</label>
+            <input name="genre" value={form.genre} onChange={handleChange} style={inputStyle} />
+
+            <label>Kinh phí:</label>
+            <input name="budget" type="number" value={form.budget} onChange={handleChange} style={inputStyle} />
+
+            <label>Trạng thái:</label>
             <select name="status" value={form.status} onChange={handleChange} style={inputStyle}>
-              <option value="">-- Chọn trạng thái --</option>
+              <option value="">-- chọn --</option>
               <option value="now_showing">Đang chiếu</option>
               <option value="coming_soon">Sắp chiếu</option>
               <option value="ended">Ngừng chiếu</option>
             </select>
 
-            <input name="releaseDate" type="date" value={form.releaseDate} onChange={handleChange} style={inputStyle} />
-            <input name="description" placeholder="Mô tả" value={form.description} onChange={handleChange} style={inputStyle} />
-            <input name="poster" placeholder="Link ảnh" value={form.poster} onChange={handleChange} style={inputStyle} />
+            <label>Bom tấn:</label>
+            <select name="blockbuster" value={form.blockbuster.toString()} onChange={handleChange} style={inputStyle}>
+              <option value="false">Phim thường</option>
+              <option value="true">Bom tấn</option>
+            </select>
+
+            <label>Mô tả:</label>
+            <textarea name="description" value={form.description} onChange={handleChange} style={inputStyle} />
 
             <button onClick={handleSubmit} style={btnStyle}>
-              {editingId ? "Cập nhật" : "Thêm"}
+              {editingId ? "CẬP NHẬT" : "THÊM MỚI"}
             </button>
-          </>
+          </div>
         )}
+
+        {/* ================= POPUP DETAIL ================= */}
+        {selectedMovie && (
+  <div style={modalOverlay} onClick={() => setSelectedMovie(null)}>
+    <div style={modalBox} onClick={(e) => e.stopPropagation()}>
+      <span style={closeBtn} onClick={() => setSelectedMovie(null)}>
+        ✖
+      </span>
+
+      <h2 style={{ marginBottom: 15 }}>{selectedMovie.title}</h2>
+
+      <div style={{ display: "flex", gap: 15 }}>
+        <img src={selectedMovie.poster} style={posterStyleSmall} />
+
+        <div style={{ flex: 1 }}>
+          <p><b>Thể loại:</b> {selectedMovie.genre}</p>
+          <p><b>Trạng thái:</b> {selectedMovie.status}</p>
+          <p><b>Thời lượng:</b> {selectedMovie.duration} phút</p>
+          <p><b>Kinh phí:</b> ${selectedMovie.budget}</p>
+          <p>
+            <b>Bom tấn:</b>{" "}
+            <span style={{ color: selectedMovie.blockbuster ? "gold" : "#aaa" }}>
+              {selectedMovie.blockbuster ? "🔥 Có" : "Không"}
+            </span>
+          </p>
+        </div>
       </div>
 
-      {/* ================= MODAL DETAIL ================= */}
-      {selectedMovie && (
-        <div style={modalOverlay}>
-          <div style={modalBox}>
-            <span style={closeBtn} onClick={() => setSelectedMovie(null)}>
-              ✕
-            </span>
-
-            <div style={{ display: "flex", gap: 20 }}>
-              <img src={selectedMovie.poster} style={posterStyle} />
-
-              <div>
-                <h2>{selectedMovie.title}</h2>
-
-                <p><b>Thể loại:</b> {selectedMovie.genre}</p>
-                <p><b>Thời lượng:</b> {selectedMovie.duration}</p>
-                <p><b>Trạng thái:</b> {selectedMovie.status}</p>
-                <p><b>Ngày chiếu:</b> {selectedMovie.releaseDate}</p>
-
-                <p><b>Mô tả:</b></p>
-                <div style={descBox}>
-                  {selectedMovie.description}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <div style={descBoxSmall}>
+        <b>Mô tả</b>
+        <p style={{ marginTop: 5 }}>{selectedMovie.description}</p>
+      </div>
+    </div>
+  </div>
+)}
+      </div>
     </div>
   );
 };
 
 /* ================= STYLE ================= */
+
+const inputStyle = {
+  width: "100%",
+  padding: "12px",
+  marginBottom: "15px",
+  borderRadius: "10px",
+  border: "1px solid #333",
+  background: "#1e293b",
+  color: "white",
+};
+
+
+
+
+const posterStyleSmall = {
+  width: 120,
+  height: 160,
+  objectFit: "cover",
+  borderRadius: 10,
+};
+
+const descBoxSmall = {
+  marginTop: 12,
+  background: "#111827",
+  padding: 10,
+  borderRadius: 10,
+  fontSize: "13px",
+  color: "#ddd",
+};
+
 
 const tabBtn = (active) => ({
   background: active ? "red" : "#444",
@@ -274,14 +322,6 @@ const cardStyle = {
   padding: "30px",
   borderRadius: "20px",
   color: "white",
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "12px",
-  marginBottom: "15px",
-  borderRadius: "20px",
-  border: "none",
 };
 
 const filterInputStyle = {
@@ -322,10 +362,7 @@ const iconStyle = {
 
 const modalOverlay = {
   position: "fixed",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
+  inset: 0,
   background: "rgba(0,0,0,0.7)",
   display: "flex",
   justifyContent: "center",

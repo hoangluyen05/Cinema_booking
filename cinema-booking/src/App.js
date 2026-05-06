@@ -9,6 +9,7 @@ import MovieDetail from "./pages/public/MovieDetail";
 import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
 import Cinema from "./pages/public/Cinema";
+import MovieBlockbuster from "./pages/public/MovieBlockbusters";
 
 /* ===== USER PAGES ===== */
 import Booking from "./pages/user/Booking";
@@ -43,6 +44,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/cinema" element={<Cinema />} />
+          <Route path="/blockbusters" element={<MovieBlockbuster />} />
           <Route
   path="/booking"
   element={

@@ -27,13 +27,17 @@ public class Movie {
 
     private String status;
 
-    
+    @Column(name = "budget")
+    private Double budget;
+
+    @Column(name = "is_blockbuster")
+    private boolean isBlockbuster;
 
     public Movie() {
     }
 
     public Movie(Long id, String title, String genre, Integer duration, String description,
-                 LocalDate releaseDate, String poster, String status) {
+                 LocalDate releaseDate, String poster, String status, Double budget, boolean isBlockbuster) {
         this.id = id;
         this.title = title;
         this.genre = genre;
@@ -42,6 +46,8 @@ public class Movie {
         this.releaseDate = releaseDate;
         this.poster = poster;
         this.status = status;
+        this.budget = budget;
+        this.isBlockbuster = isBlockbuster;
     }
 
     public Long getId() {
@@ -107,4 +113,21 @@ public class Movie {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public Double getBudget() {
+        return budget;
+    }
+
+    public void setBudget(Double budget) {
+        this.budget = budget;
+    }
+
+    public boolean isBlockbuster() {
+        return isBlockbuster;
+    }
+
+    public void setBlockbuster(boolean blockbuster) {
+        isBlockbuster = blockbuster;
+    }
+
 }

@@ -3,7 +3,6 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 
 export default function ManageCinema() {
   const [tab, setTab] = useState("list");
-
   const [cinemas, setCinemas] = useState([]);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -16,40 +15,15 @@ export default function ManageCinema() {
 
   const API = "http://localhost:8080/api/cinemas";
 
-  // danh sách tỉnh thành
   const provinces = [
-    "Hà Nội",
-    "TP Hồ Chí Minh",
-    "Đà Nẵng",
-    "Hải Phòng",
-    "Cần Thơ",
-    "An Giang",
-    "Bà Rịa - Vũng Tàu",
-    "Bắc Giang",
-    "Bắc Ninh",
-    "Bình Dương",
-    "Bình Định",
-    "Bình Thuận",
-    "Cà Mau",
-    "Đắk Lắk",
-    "Đồng Nai",
-    "Gia Lai",
-    "Hà Nam",
-    "Hải Dương",
-    "Khánh Hòa",
-    "Lâm Đồng",
-    "Nam Định",
-    "Nghệ An",
-    "Ninh Bình",
-    "Phú Thọ",
-    "Quảng Ninh",
-    "Thanh Hóa",
-    "Thừa Thiên Huế",
-    "Tiền Giang",
-    "Vĩnh Phúc"
+    "Hà Nội", "TP Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ",
+    "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Ninh", "Bình Dương",
+    "Bình Định", "Bình Thuận", "Cà Mau", "Đắk Lắk", "Đồng Nai", "Gia Lai",
+    "Hà Nam", "Hải Dương", "Khánh Hòa", "Lâm Đồng", "Nam Định", "Nghệ An",
+    "Ninh Bình", "Phú Thọ", "Quảng Ninh", "Thanh Hóa", "Thừa Thiên Huế",
+    "Tiền Giang", "Vĩnh Phúc"
   ];
 
-  // LOAD + SEARCH
   const fetchCinemas = async () => {
     try {
       const query = `?cinemaName=${filters.name}&address=${filters.address}`;
@@ -71,30 +45,24 @@ export default function ManageCinema() {
     setEditingId(null);
   };
 
-  // ADD / UPDATE
   const handleSubmit = async () => {
-    if (!name || !address) return;
+    if (!name || !address) {
+        alert("Vui lòng nhập đầy đủ thông tin");
+        return;
+    }
 
     try {
-      if (editingId) {
-        await fetch(`${API}/${editingId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cinemaName: name,
-            address: address,
-          }),
-        });
-      } else {
-        await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cinemaName: name,
-            address: address,
-          }),
-        });
-      }
+      const method = editingId ? "PUT" : "POST";
+      const url = editingId ? `${API}/${editingId}` : API;
+      
+      await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cinemaName: name,
+          address: address,
+        }),
+      });
 
       resetForm();
       setTab("list");
@@ -104,7 +72,6 @@ export default function ManageCinema() {
     }
   };
 
-  // EDIT
   const handleEdit = (cinema) => {
     setEditingId(cinema.id);
     setName(cinema.cinemaName);
@@ -112,223 +79,254 @@ export default function ManageCinema() {
     setTab("form");
   };
 
-  // DELETE
   const handleDelete = async (id) => {
-    try {
-      await fetch(`${API}/${id}`, {
-        method: "DELETE",
-      });
-      fetchCinemas();
-    } catch (err) {
-      console.error("Lỗi delete:", err);
+    if (window.confirm("Bạn có chắc muốn xóa rạp này?")) {
+      try {
+        await fetch(`${API}/${id}`, { method: "DELETE" });
+        fetchCinemas();
+      } catch (err) {
+        console.error("Lỗi delete:", err);
+      }
     }
   };
 
-  // FILTER
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   return (
-    <>
-      <style>{`
-      .cinema-wrapper {
-        display: flex;
-        justify-content: center;
-        padding: 30px 20px;
-        min-height: 100vh;
-      }
+    <div style={wrapperStyle}>
+      <div style={cardStyle}>
+        <h2 style={{ marginBottom: "25px" }}>Quản Lý Rạp Chiếu</h2>
 
-      .cinema-card {
-        width: 100%;
-        max-width: 1000px;
-        background: linear-gradient(to right, #081225, #050d1f);
-        padding: 30px;
-        border-radius: 20px;
-        color: white;
-      }
+        {/* TABS */}
+        <div style={{ marginBottom: "30px" }}>
+          <button
+            style={tabBtn(tab === "list")}
+            onClick={() => setTab("list")}
+          >
+            Danh sách rạp
+          </button>
+          <button
+            style={tabBtn(tab === "form")}
+            onClick={() => {
+              resetForm();
+              setTab("form");
+            }}
+          >
+            {editingId ? "Đang cập nhật" : "Thêm rạp mới"}
+          </button>
+        </div>
 
-      .tab-btn {
-        padding: 10px 20px;
-        border-radius: 20px;
-        border: none;
-        margin-right: 10px;
-        cursor: pointer;
-        color: white;
-      }
-
-      .active {
-        background: red;
-      }
-
-      .inactive {
-        background: #444;
-      }
-
-      .form-input {
-        width: 100%;
-        padding: 14px;
-        margin-bottom: 20px;
-        border-radius: 30px;
-        border: none;
-        background: #dcdcdc;
-      }
-
-      .btn-add {
-        background: red;
-        color: white;
-        border: none;
-        padding: 10px 25px;
-        border-radius: 15px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      .cinema-header,
-      .cinema-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr 150px;
-        gap: 20px;
-        align-items: center;
-      }
-
-      .column-title {
-        color: red;
-        font-weight: bold;
-      }
-
-      .search-input {
-        width: 100%;
-        padding: 4px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #e5e5e5;
-        color: black;
-        font-size: 12px;
-        height: 26px;
-        margin-top: 5px;
-      }
-
-      .cinema-row {
-        padding: 12px 0;
-        border-bottom: 1px solid #222;
-      }
-
-      .icon {
-        cursor: pointer;
-        margin-right: 15px;
-      }
-
-      .icon:hover {
-        color: red;
-      }
-
-      .empty-row {
-        color: #777;
-        padding: 20px 0;
-      }
-      `}</style>
-
-      <div className="cinema-wrapper">
-        <div className="cinema-card">
-          <h2>Quản Lý Rạp</h2>
-
-          {/* TAB */}
-          <div style={{ marginBottom: "20px" }}>
-            <button
-              className={`tab-btn ${tab === "list" ? "active" : "inactive"}`}
-              onClick={() => setTab("list")}
-            >
-              Danh sách
-            </button>
-
-            <button
-              className={`tab-btn ${tab === "form" ? "active" : "inactive"}`}
-              onClick={() => {
-                resetForm();
-                setTab("form");
-              }}
-            >
-              Thêm rạp
-            </button>
-          </div>
-
-          {/* ===== LIST ===== */}
-          {tab === "list" && (
-            <div className="cinema-table">
-
-              <div className="cinema-header">
-                <div>
-                  <span className="column-title">Tên</span>
+        {/* ===== LIST VIEW ===== */}
+        {tab === "list" && (
+          <table style={tableStyle}>
+            <thead>
+              <tr style={{ color: "red" }}>
+                <th style={thStyle}>
+                  Tên rạp
                   <input
                     name="name"
-                    className="search-input"
-                    placeholder="Tìm..."
+                    style={filterInputStyle}
+                    placeholder="Tìm tên..."
                     onChange={handleFilterChange}
                   />
-                </div>
-
-                <div>
-                  <span className="column-title">Địa chỉ</span>
+                </th>
+                <th style={thStyle}>
+                  Địa chỉ (Tỉnh/Thành)
                   <input
                     name="address"
-                    className="search-input"
-                    placeholder="Tìm..."
+                    style={filterInputStyle}
+                    placeholder="Tìm địa chỉ..."
                     onChange={handleFilterChange}
                   />
-                </div>
-
-                <div className="column-title">Thao tác</div>
-              </div>
-
-              {cinemas.length === 0 ? (
-                <div className="empty-row">Không có kết quả</div>
-              ) : (
-                cinemas.map((cinema) => (
-                  <div key={cinema.id} className="cinema-row">
-                    <div>{cinema.cinemaName}</div>
-                    <div>{cinema.address}</div>
-                    <div>
-                      <FaEdit className="icon" onClick={() => handleEdit(cinema)} />
-                      <FaTrash className="icon" onClick={() => handleDelete(cinema.id)} />
-                    </div>
-                  </div>
+                </th>
+                <th style={thStyle}>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cinemas.length > 0 ? (
+                cinemas.map((c) => (
+                  <tr key={c.id} style={trStyle}>
+                    <td style={tdStyle}>{c.cinemaName}</td>
+                    <td style={tdStyle}>{c.address}</td>
+                    <td style={tdStyle}>
+                      <FaEdit style={iconStyle} onClick={() => handleEdit(c)} />
+                      <FaTrash style={iconStyle} onClick={() => handleDelete(c.id)} />
+                    </td>
+                  </tr>
                 ))
+              ) : (
+                <tr>
+                  <td colSpan="3" style={{ padding: "30px", opacity: 0.5, textAlign: "center" }}>
+                    Không tìm thấy dữ liệu rạp chiếu
+                  </td>
+                </tr>
               )}
-            </div>
-          )}
+            </tbody>
+          </table>
+        )}
 
-          {/* ===== FORM ===== */}
-          {tab === "form" && (
-            <>
+        {/* ===== FORM VIEW ===== */}
+        {tab === "form" && (
+          <div style={formContainer}>
+            <div style={inputGroup}>
+              <label style={labelStyle}>Tên rạp chiếu:</label>
               <input
-                className="form-input"
+                style={inputStyle}
                 type="text"
-                placeholder="Tên rạp"
+                placeholder="Nhập tên rạp (ví dụ: Cinema Đà Nẵng)"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+            </div>
 
+            <div style={inputGroup}>
+              <label style={labelStyle}>Tỉnh / Thành phố:</label>
               <select
-                className="form-input"
+                style={inputStyle}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
               >
-                <option value="">Chọn tỉnh / thành</option>
+                <option value="">-- Chọn địa điểm --</option>
                 {provinces.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
+                  <option key={p} value={p}>{p}</option>
                 ))}
               </select>
+            </div>
 
-              <button className="btn-add" onClick={handleSubmit}>
-                {editingId ? "Cập nhật" : "Thêm"}
-              </button>
-            </>
-          )}
-        </div>
+            <button style={btnSubmit} onClick={handleSubmit}>
+              {editingId ? "CẬP NHẬT THÔNG TIN" : "XÁC NHẬN THÊM RẠP"}
+            </button>
+            
+            {editingId && (
+                <button 
+                    style={{...btnSubmit, background: "#444", marginTop: "10px"}} 
+                    onClick={() => { resetForm(); setTab("list"); }}
+                >
+                    HỦY BỎ
+                </button>
+            )}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }
+
+/* ================= STYLES (Đồng bộ với ManageMovies) ================= */
+
+const wrapperStyle = {
+  minHeight: "100vh",
+  background: "black",
+  padding: "40px 20px",
+  fontFamily: "Arial, sans-serif",
+};
+
+const cardStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  background: "linear-gradient(to right, #0f172a, #020617)",
+  padding: "40px",
+  borderRadius: "20px",
+  color: "white",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+};
+
+const tabBtn = (active) => ({
+  background: active ? "red" : "#1e293b",
+  color: "white",
+  border: "none",
+  padding: "12px 25px",
+  marginRight: "10px",
+  borderRadius: "30px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  transition: "0.3s",
+});
+
+const formContainer = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "20px",
+  maxWidth: "600px",
+};
+
+const inputGroup = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "8px",
+};
+
+const labelStyle = {
+  fontSize: "14px",
+  color: "#94a3b8",
+  marginLeft: "5px",
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "15px",
+  borderRadius: "12px",
+  border: "1px solid #334155",
+  background: "#1e293b",
+  color: "white",
+  fontSize: "16px",
+  outline: "none",
+};
+
+const btnSubmit = {
+  background: "red",
+  color: "white",
+  border: "none",
+  padding: "15px",
+  borderRadius: "12px",
+  cursor: "pointer",
+  fontWeight: "bold",
+  fontSize: "16px",
+  marginTop: "10px",
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+};
+
+const thStyle = {
+  textAlign: "left",
+  padding: "15px",
+  borderBottom: "2px solid #1e293b",
+};
+
+const tdStyle = {
+  padding: "15px",
+  borderBottom: "1px solid #1e293b",
+};
+
+const trStyle = {
+    transition: "0.2s",
+};
+
+const filterInputStyle = {
+  display: "block",
+  marginTop: "8px",
+  width: "90%",
+  padding: "8px",
+  borderRadius: "8px",
+  border: "none",
+  background: "#1e293b",
+  color: "white",
+  fontSize: "13px",
+};
+
+const iconStyle = {
+  cursor: "pointer",
+  marginRight: "20px",
+  fontSize: "18px",
+  transition: "0.2s",
+  color: "#94a3b8",
+};
+
+const iconHoverStyle = {
+    color: "red"
+}; // Note: FaEdit/FaTrash hover logic usually handled via CSS classes or state

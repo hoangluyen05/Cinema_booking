@@ -19,6 +19,16 @@ public class MovieService {
         this.showtimeRepository = showtimeRepository;
     }
 
+    // 1. Lấy phim bom tấn đang chiếu
+    public List<Movie> getBlockbustersNowShowing() {
+        return movieRepository.findByIsBlockbusterTrueAndStatus("now_showing");
+    }
+
+    // 2. Lấy phim bom tấn sắp chiếu
+    public List<Movie> getBlockbustersComingSoon() {
+        return movieRepository.findByIsBlockbusterTrueAndStatus("coming_soon");
+    } 
+
     // phim đang chiếu
     public List<Movie> getNowShowing(){
         return movieRepository.findByStatus("now_showing");
@@ -54,11 +64,13 @@ public class MovieService {
 
     // 🔥 CREATE
     public Movie create(Movie movie) {
+        if (movie.getBudget() == null) movie.setBudget(0.0);
         return movieRepository.save(movie);
     }
 
     // 🔥 UPDATE
     public Movie update(Long id, Movie movie) {
+        
         Movie m = movieRepository.findById(id).orElseThrow();
 
         m.setTitle(movie.getTitle());
@@ -69,6 +81,9 @@ public class MovieService {
         m.setPoster(movie.getPoster());
         m.setStatus(movie.getStatus());
 
+        // Cập nhật giá trị mới cho bom tấn[cite: 1]
+        m.setBudget(movie.getBudget());
+        m.setBlockbuster(movie.isBlockbuster());
         return movieRepository.save(m);
     }
 

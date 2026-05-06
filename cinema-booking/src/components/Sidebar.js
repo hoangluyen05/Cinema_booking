@@ -66,6 +66,7 @@ const Sidebar = () => {
         <>
           <Link to="/" style={menuButtonStyle}>Trang chủ</Link>
           <Link to="/movies" style={menuButtonStyle}>Phim</Link>
+          <Link to="/blockbusters" style={menuButtonStyle}>Phim bom tấn</Link>
           <Link to="/cinema" style={menuButtonStyle}>Rạp</Link>
           <Link to="/profile" style={menuButtonStyle}>Cá nhân</Link>
 

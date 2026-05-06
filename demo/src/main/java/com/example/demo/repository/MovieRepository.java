@@ -29,4 +29,10 @@ WHERE r.cinemaId = :cinemaId
         String genre,
         String status
     );
+
+    // Lấy phim bom tấn theo trạng thái (now_showing, coming_soon)
+    List<Movie> findByIsBlockbusterTrueAndStatus(String status);
+
+    // Tìm kiếm phim theo tên (không phân biệt hoa thường)
+    List<Movie> findByTitleContainingIgnoreCase(String title);
 }

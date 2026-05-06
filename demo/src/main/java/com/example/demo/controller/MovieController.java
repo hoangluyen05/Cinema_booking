@@ -20,6 +20,17 @@ public class MovieController {
         this.movieService = movieService;
     }
 
+    // API lấy phim bom tấn đang chiếu
+    @GetMapping("/blockbusters/now-showing")
+    public List<Movie> getNowShowingBlockbusters() {
+        return movieService.getBlockbustersNowShowing();
+    }
+
+    // API lấy phim bom tấn sắp chiếu
+    @GetMapping("/blockbusters/coming-soon")
+    public List<Movie> getComingSoonBlockbusters() {
+        return movieService.getBlockbustersComingSoon();
+    }
     // phim đang chiếu
     @GetMapping("/now-showing")
     public List<Movie> getNowShowing(){
