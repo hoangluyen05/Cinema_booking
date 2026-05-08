@@ -49,27 +49,42 @@ const ManageMovies = () => {
 
     setForm((prev) => ({ ...prev, [name]: finalValue }));
   };
+const validateForm = () => {
+  let newErrors = {};
+  if (!form.title || form.title.trim() === "") newErrors.title = "Tên phim không được để trống";
+  if (!form.genre || form.genre.trim() === "") newErrors.genre = "Vui lòng nhập thể loại";
+  if (form.budget <= 0) newErrors.budget = "Kinh phí phải lớn hơn 0";
+  if (!form.status) newErrors.status = "Vui lòng chọn trạng thái";
+  if (!form.description || form.description.trim() === "") newErrors.description = "Mô tả không được để trống";
 
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0; // Trả về true nếu không có lỗi
+};
   const handleSubmit = async () => {
-    const method = editingId ? "PUT" : "POST";
-    const url = editingId ? `${API}/${editingId}` : API;
+  // THÊM ĐOẠN KIỂM TRA NÀY:
+  if (!validateForm()) {
+    return; // Dừng lại, không chạy code bên dưới nếu có lỗi
+  }
 
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+  const method = editingId ? "PUT" : "POST";
+  // ... giữ nguyên phần fetch bên dưới của bạn ...
+  const url = editingId ? `${API}/${editingId}` : API;
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(form),
+  });
 
-    if (res.ok) {
-      alert(editingId ? "Cập nhật thành công!" : "Thêm mới thành công!");
-      resetForm();
-      setTab("list");
-      fetchMovies();
-    } else {
-      alert("Lỗi khi lưu dữ liệu!");
-    }
-  };
-
+  if (res.ok) {
+    alert(editingId ? "Cập nhật thành công!" : "Thêm mới thành công!");
+    resetForm();
+    setErrors({}); // THÊM DÒNG NÀY để xóa lỗi cũ sau khi thành công
+    setTab("list");
+    fetchMovies();
+  } else {
+    alert("Lỗi khi lưu dữ liệu!");
+  }
+};
   const resetForm = () => {
     setForm({
       title: "",
@@ -101,6 +116,7 @@ const ManageMovies = () => {
       fetchMovies();
     }
   };
+  const [errors, setErrors] = useState({});
 
   return (
     <div style={wrapperStyle}>
@@ -195,38 +211,43 @@ const ManageMovies = () => {
 
         {/* ================= FORM ================= */}
         {tab === "form" && (
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <label>Tên phim:</label>
-            <input name="title" value={form.title} onChange={handleChange} style={inputStyle} />
+  <div style={{ display: "flex", flexDirection: "column" }}>
+    <label>Tên phim:</label>
+    <input name="title" value={form.title} onChange={handleChange} style={inputStyle} />
+    {errors.title && <span style={errorTextStyle}>{errors.title}</span>}
 
-            <label>Thể loại:</label>
-            <input name="genre" value={form.genre} onChange={handleChange} style={inputStyle} />
+    <label>Thể loại:</label>
+    <input name="genre" value={form.genre} onChange={handleChange} style={inputStyle} />
+    {errors.genre && <span style={errorTextStyle}>{errors.genre}</span>}
 
-            <label>Kinh phí:</label>
-            <input name="budget" type="number" value={form.budget} onChange={handleChange} style={inputStyle} />
+    <label>Kinh phí:</label>
+    <input name="budget" type="number" value={form.budget} onChange={handleChange} style={inputStyle} />
+    {errors.budget && <span style={errorTextStyle}>{errors.budget}</span>}
 
-            <label>Trạng thái:</label>
-            <select name="status" value={form.status} onChange={handleChange} style={inputStyle}>
-              <option value="">-- chọn --</option>
-              <option value="now_showing">Đang chiếu</option>
-              <option value="coming_soon">Sắp chiếu</option>
-              <option value="ended">Ngừng chiếu</option>
-            </select>
+    <label>Trạng thái:</label>
+    <select name="status" value={form.status} onChange={handleChange} style={inputStyle}>
+      <option value="">-- chọn --</option>
+      <option value="now_showing">Đang chiếu</option>
+      <option value="coming_soon">Sắp chiếu</option>
+      <option value="ended">Ngừng chiếu</option>
+    </select>
+    {errors.status && <span style={errorTextStyle}>{errors.status}</span>}
 
-            <label>Bom tấn:</label>
-            <select name="blockbuster" value={form.blockbuster.toString()} onChange={handleChange} style={inputStyle}>
-              <option value="false">Phim thường</option>
-              <option value="true">Bom tấn</option>
-            </select>
+    <label>Bom tấn:</label>
+    <select name="blockbuster" value={form.blockbuster.toString()} onChange={handleChange} style={inputStyle}>
+      <option value="false">Phim thường</option>
+      <option value="true">Bom tấn</option>
+    </select>
 
-            <label>Mô tả:</label>
-            <textarea name="description" value={form.description} onChange={handleChange} style={inputStyle} />
+    <label>Mô tả:</label>
+    <textarea name="description" value={form.description} onChange={handleChange} style={{...inputStyle, minHeight: '80px'}} />
+    {errors.description && <span style={errorTextStyle}>{errors.description}</span>}
 
-            <button onClick={handleSubmit} style={btnStyle}>
-              {editingId ? "CẬP NHẬT" : "THÊM MỚI"}
-            </button>
-          </div>
-        )}
+    <button onClick={handleSubmit} style={btnStyle}>
+      {editingId ? "CẬP NHẬT" : "THÊM MỚI"}
+    </button>
+  </div>
+)}
 
         {/* ================= POPUP DETAIL ================= */}
         {selectedMovie && (
@@ -396,5 +417,12 @@ const descBox = {
   padding: 10,
   borderRadius: 10,
 };
-
+const errorTextStyle = {
+  color: "#ff4d4d", // Màu đỏ sáng nổi bật trên nền tối
+  fontSize: "13px",
+  marginTop: "-12px", // Kéo sát lên input phía trên
+  marginBottom: "12px",
+  fontWeight: "500",
+  paddingLeft: "5px"
+};
 export default ManageMovies;
